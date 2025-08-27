@@ -1,0 +1,491 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coin Games - Earn Websim Credits</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="background-shapes"></div>
+    <!-- Loading Screen -->
+    <div id="loadingScreen" class="loading-screen">
+        <div class="loader">
+            <div class="coin-spinner"></div>
+            <p>Loading your coin games...</p>
+        </div>
+    </div>
+
+    <!-- Main App Container -->
+    <div id="app" class="app-container" style="display: none;">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <div class="logo">
+                    <span class="coin-icon">🪙</span>
+                    <h1>Coin Games</h1>
+                </div>
+                <div class="user-info" id="userInfo">
+                    <div class="coin-balance">
+                        <span class="coin-icon">🪙</span>
+                        <span id="coinBalance">0</span>
+                    </div>
+                    <div class="user-profile" id="userProfile">
+                        <img id="userAvatar" src="" alt="User Avatar" class="user-avatar">
+                        <span id="username">Loading...</span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Navigation -->
+        <nav class="nav-tabs">
+            <button class="nav-tab active" data-tab="games">🎮 Games</button>
+            <button class="nav-tab" data-tab="leaderboard">🏆 Leaderboard</button>
+            <button class="nav-tab" data-tab="credits">💳 Credits</button>
+            <button class="nav-tab" data-tab="store">🛍️ Store</button>
+            <button class="nav-tab" data-tab="support">❤️ Support</button>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Games Tab -->
+            <div id="gamesTab" class="tab-content active">
+                <div class="games-grid">
+                    <div class="game-card" data-game="catch">
+                        <div class="game-icon">💰</div>
+                        <h3>Catch Coins</h3>
+                        <p>Catch falling coins. This game is endless!</p>
+                        <div class="game-stats">
+                            +0.05 coins per catch
+                        </div>
+                        <button class="play-btn" id="catchBtn">Play Now</button>
+                    </div>
+
+                    <div class="game-card" data-game="snake">
+                        <div class="game-icon">🐍💰</div>
+                        <h3>Coin Snake</h3>
+                        <p>Collect coins, grow your snake, and don't hit the walls!</p>
+                        <div class="game-stats">
+                            +1 coin per coin collected
+                        </div>
+                        <button class="play-btn" id="snakeBtn">Play Now</button>
+                    </div>
+
+                    <div class="game-card" data-game="target">
+                        <div class="game-icon">🎯</div>
+                        <h3>Hit Targets</h3>
+                        <p>Click targets that appear randomly!</p>
+                        <div class="game-stats">
+                            +1 coin per target
+                        </div>
+                        <button class="play-btn" id="targetBtn">Play Now</button>
+                    </div>
+
+                    <div class="game-card" data-game="balloons">
+                        <div class="game-icon">🎈</div>
+                        <h3>Pop Balloons</h3>
+                        <p>Pop balloons to collect coins inside!</p>
+                        <div class="game-stats">
+                            1-3 coins per balloon
+                        </div>
+                        <button class="play-btn" id="balloonsBtn">Play Now</button>
+                    </div>
+
+                    <div class="game-card" data-game="squares">
+                        <div class="game-icon">⬜</div>
+                        <h3>Catch Squares</h3>
+                        <p>Click on fast-moving squares!</p>
+                        <div class="game-stats">
+                            1-3 coins per square
+                        </div>
+                        <button class="play-btn" id="squaresBtn">Play Now</button>
+                    </div>
+
+                    <div class="game-card" data-game="clicker">
+                        <div class="game-icon">🖱️</div>
+                        <h3>Click & Win</h3>
+                        <p>Click to earn coins! Our AI monitors for auto-clickers, so play fair. No cooldown!</p>
+                        <div class="game-stats">
+                            +0.05 coins per click
+                        </div>
+                        <button class="play-btn" id="clickerBtn">Play Now</button>
+                    </div>
+
+                    <div class="game-card" data-game="slot">
+                        <div class="game-icon">🎰</div>
+                        <h3>Coin Slot</h3>
+                        <p>Bet your coins and spin the reels for a chance to win big! Prizes up to 250x your bet.</p>
+                        <div class="game-stats">
+                            Bet 1-15 coins
+                        </div>
+                        <button class="play-btn" id="slotBtn">Play Now</button>
+                    </div>
+
+                    <div class="game-card" data-game="guess" style="display: none;">
+                        <div class="game-icon">🔢</div>
+                        <h3>Guess the Number</h3>
+                        <p>Guess the number between 1-20.</p>
+                        <div class="game-stats">
+                            +5 to 15 coins if correct
+                        </div>
+                        <button class="play-btn" id="guessBtn">Play Now</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Leaderboard Tab -->
+            <div id="leaderboardTab" class="tab-content">
+                <div class="leaderboard-container">
+                    <h2>🏆 Top Players</h2>
+                    <div class="leaderboard-list" id="leaderboardList">
+                        <!-- Leaderboard entries will be populated here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Credits Tab -->
+            <div id="creditsTab" class="tab-content">
+                <div class="credits-container">
+                    <div class="credits-info">
+                        <h2>💳 Convert Coins to Credits</h2>
+                        
+                        <div class="conversion-rate">
+                            <div class="rate-card">
+                                <span class="coin-icon">🪙</span>
+                                <span class="rate">100 Coins = 25 Websim Credits</span>
+                            </div>
+                        </div>
+                         <div class="tip-info" style="background: var(--surface-color); border: 2px solid var(--primary-color); padding: 1rem; border-radius: 12px; margin-bottom: 1.5rem;">
+                            <h4 style="color: var(--primary-color);">Conversion Rules</h4>
+                            <p style="color: var(--text-secondary); font-size: 0.875rem;">Minimum conversion is 100 coins. You must have at least one public project on your Websim profile to be eligible for conversions. <br><strong>🏆 VIP members get an extra 25 credits per conversion!</strong></p>
+                        </div>
+                        <div class="conversion-form">
+                            <div class="input-group">
+                                <label>Coins to Convert:</label>
+                                <input type="number" id="coinsToConvert" min="100" step="100" placeholder="100">
+                                <span class="conversion-preview" id="conversionPreview">= 0 Credits</span>
+                            </div>
+                            <button class="convert-btn" id="convertBtn">Convert Coins</button>
+                        </div>
+                    </div>
+                    
+                    <div class="conversion-history">
+                        <h3>Conversion History</h3>
+                        <div class="history-list" id="conversionHistory">
+                            <!-- History entries will be populated here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Store Tab -->
+            <div id="storeTab" class="tab-content">
+                <div class="store-container">
+                    <div class="store-header">
+                        <h2>🛍️ Item Shop</h2>
+                        <p>Spend your coins and credits on powerful boosts and perks!</p>
+                    </div>
+
+                    <div id="perkStatus" class="perk-status" style="display: none;">
+                        <!-- Status of active perks will be shown here -->
+                    </div>
+
+                    <div class="store-grid" id="storeGrid">
+                        <!-- VIP Membership Card -->
+                        <div class="product-card vip-card">
+                            <div class="product-icon">🏆</div>
+                            <h3>VIP Membership</h3>
+                            <p class="product-desc">Gain exclusive perks and stand out from the crowd for 3 days!</p>
+                            <ul class="perk-list">
+                                <li>+75 coins per game</li>
+                                <li>+25 extra credits on conversion</li>
+                                <li>Special Leaderboard Badge</li>
+                                <li>1 Credit → 6 Coins exchange rate</li>
+                            </ul>
+                            <div class="product-price">🪙 2000 Coins / 3 Days</div>
+                            <button class="purchase-btn" id="purchaseVipBtn">Purchase VIP</button>
+                        </div>
+
+                        <!-- 5% Coin Boost Card -->
+                        <div class="product-card boost-card">
+                            <div class="product-icon">⚡</div>
+                            <h3>+5% Coin Boost</h3>
+                            <p class="product-desc">Get a 5% bonus on all coins earned from games. Comes with 10 charges.</p>
+                             <ul class="perk-list">
+                                <li>+5% coin bonus from games</li>
+                                <li>10 uses per purchase</li>
+                            </ul>
+                            <div class="product-price">🪙 50 Coins</div>
+                            <button class="purchase-btn" id="purchaseBoostBtn">Purchase Boost</button>
+                            <button class="reset-my-boost-btn" id="resetMyBoostBtn" style="display: none;">Reset My Boost Uses</button>
+                        </div>
+
+                        <!-- Credits to Coins Card -->
+                        <div class="product-card conversion-card">
+                             <div class="product-icon">🔄</div>
+                             <h3>Credits to Coins</h3>
+                             <p class="product-desc">Convert your Websim Credits back into game coins at a great rate.</p>
+                             <div class="conversion-rate-store">
+                                <div class="rate-card-store" id="creditsToCoinsRate">
+                                    <span class="coin-icon">💳</span>
+                                    <span class="rate">1 Credit = 3 Coins</span>
+                                    <span class="coin-icon">🪙</span>
+                                </div>
+                            </div>
+                            <div class="conversion-form-store">
+                                <div class="input-group">
+                                    <input type="number" id="creditsToConvert" min="1" step="1" placeholder="10">
+                                    <span class="conversion-preview" id="creditConversionPreview">= 30 Coins</span>
+                                </div>
+                                <button class="purchase-btn" id="purchaseCoinsBtn">Convert Credits</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Admin Quick Actions (for admin user) -->
+                    <div id="storeAdminActions" class="admin-actions-container" style="display: none;">
+                        <h3>⚙️ Admin Quick Actions</h3>
+                        <div class="admin-actions-grid">
+                            <button id="resetVipBtnStore" class="admin-action-btn vip-reset">Reset All VIP Data</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Admin Tab -->
+            <div id="adminTab" class="tab-content">
+                <div class="admin-dashboard">
+                    <nav class="admin-nav">
+                        <button class="admin-nav-btn active" data-section="overview">📊 Overview</button>
+                        <button class="admin-nav-btn" data-section="requests">💳 Credit Requests</button>
+                        <button class="admin-nav-btn" data-section="users">👥 Users</button>
+                        <button class="admin-nav-btn" data-section="transactions">📋 Transactions</button>
+                    </nav>
+                    <main class="admin-main">
+                        <!-- Overview Section -->
+                        <section id="overview-section" class="admin-section active">
+                            <div class="stats-grid">
+                                <div class="stat-card">
+                                    <div class="stat-icon">👥</div>
+                                    <div class="stat-info">
+                                        <h3>Total Users</h3>
+                                        <div class="stat-value" id="adminTotalUsers">0</div>
+                                    </div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-icon">⏳</div>
+                                    <div class="stat-info">
+                                        <h3>Pending Requests</h3>
+                                        <div class="stat-value" id="adminPendingRequests">0</div>
+                                    </div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-icon">🪙</div>
+                                    <div class="stat-info">
+                                        <h3>Total Coins Earned</h3>
+                                        <div class="stat-value" id="adminTotalCoinsEarned">0</div>
+                                    </div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-icon">💳</div>
+                                    <div class="stat-info">
+                                        <h3>Credits Converted</h3>
+                                        <div class="stat-value" id="adminCreditsConverted">0</div>
+                                    </div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-icon">🏦</div>
+                                    <div class="stat-info">
+                                        <h3>Admin Vault</h3>
+                                        <div class="stat-value" id="adminVaultBalance">0</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="admin-cards">
+                                <div class="card">
+                                    <h3>📈 Recent Activity</h3>
+                                    <div id="adminRecentActivity" class="activity-list">
+                                        <!-- Activity items will be populated here -->
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+
+                        <!-- Credit Requests Section -->
+                        <section id="requests-section" class="admin-section">
+                            <div class="section-header">
+                                <h2>💳 Credit Conversion Requests</h2>
+                                <button class="refresh-btn" id="refreshRequests">🔄 Refresh</button>
+                            </div>
+                            <div class="card">
+                                <div id="adminCreditRequestsList" class="requests-list">
+                                    <!-- Requests will be populated here -->
+                                </div>
+                            </div>
+                        </section>
+
+                        <!-- Users Section -->
+                        <section id="users-section" class="admin-section">
+                            <div class="section-header">
+                                <h2>👥 User Management</h2>
+                                <button class="refresh-btn" id="refreshUsers">🔄 Refresh</button>
+                            </div>
+                            <div class="card">
+                                <div id="adminUsersList" class="users-list">
+                                    <!-- Users will be populated here -->
+                                </div>
+                            </div>
+                        </section>
+
+                        <!-- Transactions Section -->
+                        <section id="transactions-section" class="admin-section">
+                            <div class="section-header">
+                                <h2>📋 Transaction History</h2>
+                                <button class="refresh-btn" id="refreshTransactions">🔄 Refresh</button>
+                            </div>
+                            <div class="card">
+                                <div id="adminTransactionsList" class="transactions-list">
+                                    <!-- Transactions will be populated here -->
+                                </div>
+                            </div>
+                        </section>
+                    </main>
+                </div>
+            </div>
+
+            <!-- Support Tab -->
+            <div id="supportTab" class="tab-content">
+                <div class="support-container">
+                    <div class="support-info">
+                        <h2>❤️ Support the Creator</h2>
+                        <p class="mb-2" style="color: var(--text-secondary);">
+                            If you enjoy these games, you can support the creator by leaving a tipped comment on the project. Your support is greatly appreciated and helps us keep the games running!
+                        </p>
+                        
+                        <div class="text-center mt-3">
+                            <p style="color: var(--text-secondary); font-style: italic;">
+                                Thank you for your amazing support!
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div class="leaderboard-container card">
+                        <h3>🏆 Top Supporters</h3>
+                        <div class="leaderboard-list" id="tippersLeaderboard">
+                            <!-- Tippers leaderboard will be populated here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Game Modal -->
+    <div id="gameModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="gameTitle">Game</h2>
+                <button class="close-btn" id="closeModal">×</button>
+            </div>
+            <div class="modal-body" id="gameContainer">
+                <!-- Game content will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Tip Modal -->
+    <div id="tipModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="tipModalTitle">Conversion Fee Required</h2>
+                <button class="close-btn" id="closeTipModal">×</button>
+            </div>
+            <div class="modal-body" id="tipModalBody">
+                <div class="tip-instructions" style="text-align: center;">
+                    <h3>Please Pay the 25% Tip</h3>
+                    <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">To finalize your conversion, you must first pay a tip to the project creator. This helps support the game!</p>
+                    
+                    <div class="tip-details" style="background: var(--bg-color); padding: 1rem; border-radius: 12px; margin-bottom: 1.5rem; border: 1px solid var(--border-color);">
+                        <p>Coins to Convert: <strong id="tipCoinsToConvert">0</strong></p>
+                        <p>Credits to Receive: <strong id="tipCreditsToReceive">0</strong></p>
+                        <p>Required Tip: <strong id="tipRequiredAmount" class="text-warning" style="font-size: 1.2rem;">0 Websim Credits</strong></p>
+                    </div>
+                    
+                    <h4 style="margin-bottom: 1rem;">How to Tip:</h4>
+                    <ol style="text-align: left; max-width: 400px; margin: 0 auto 1.5rem; color: var(--text-secondary); list-style-position: inside;">
+                        <li style="margin-bottom: 0.5rem;">Go to the project's comment section.</li>
+                        <li style="margin-bottom: 0.5rem;">Write a comment and attach a tip of at least <strong id="tipRequiredAmount2" style="color: var(--warning-color);">0</strong> credits.</li>
+                        <li>Return here and click "Verify & Convert".</li>
+                    </ol>
+                    
+                    <button class="convert-btn" id="verifyAndConvertBtn" style="width: 100%;">Verify & Convert</button>
+                    <p id="tipError" class="text-danger" style="display: none; margin-top: 1rem;"></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Credit Conversion Modal -->
+    <div id="creditConversionModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="creditConversionModalTitle">Finalize Your Purchase</h2>
+                <button class="close-btn" id="closeCreditConversionModal">×</button>
+            </div>
+            <div class="modal-body" id="creditConversionModalBody">
+                 <div class="tip-instructions" style="text-align: center;">
+                    <h3>Please Pay with a Tip</h3>
+                    <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">To finalize your conversion, you must pay by tipping the project creator. This confirms the transaction.</p>
+                    
+                    <div class="tip-details" style="background: var(--bg-color); padding: 1rem; border-radius: 12px; margin-bottom: 1.5rem; border: 1px solid var(--border-color);">
+                        <p>Credits to Spend: <strong id="creditsToSpend">0</strong></p>
+                        <p>Coins to Receive: <strong id="coinsToReceive">0</strong></p>
+                        <p>Required Tip: <strong id="tipRequiredAmountCredits" class="text-warning" style="font-size: 1.2rem;">0 Websim Credits</strong></p>
+                    </div>
+                    
+                    <h4 style="margin-bottom: 1rem;">How to Pay:</h4>
+                    <ol style="text-align: left; max-width: 400px; margin: 0 auto 1.5rem; color: var(--text-secondary); list-style-position: inside;">
+                        <li style="margin-bottom: 0.5rem;">Go to the project's comment section.</li>
+                        <li style="margin-bottom: 0.5rem;">Write a comment and attach a tip of at least <strong id="tipRequiredAmountCredits2" style="color: var(--warning-color);">0</strong> credits.</li>
+                        <li>Return here and click "Verify & Complete Purchase".</li>
+                    </ol>
+                    
+                    <button class="convert-btn" id="verifyAndPurchaseBtn" style="width: 100%; background: var(--gradient-3);">Verify & Complete Purchase</button>
+                    <p id="purchaseError" class="text-danger" style="display: none; margin-top: 1rem;"></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Coin Earned Animation -->
+    <div id="coinEarned" class="coin-earned" style="display: none;">
+        <span class="coin-icon">🪙</span>
+        <span id="coinsEarnedText">+0</span>
+    </div>
+
+    <!-- Scripts -->
+    <script type="importmap">
+    {
+      "imports": {
+        "react": "https://esm.sh/react@18.2.0?dev",
+        "react-dom/client": "https://esm.sh/react-dom@18.2.0/client?dev",
+        "react/jsx-dev-runtime": "https://esm.sh/react@18.2.0/jsx-dev-runtime",
+        "@websim/use-query": "https://esm.websim.com/@websim/use-query",
+        "@websim/websim-socket": "https://esm.websim.com/@websim/websim-socket",
+        "marked": "https://cdn.jsdelivr.net/npm/marked/lib/marked.esm.js",
+        "dompurify": "https://cdn.jsdelivr.net/npm/dompurify/dist/purify.es.min.js"
+      }
+    }
+  </script>
+    <script src="app.js" type="module"></script>
+    <script src="games/catch.js"></script>
+    <script src="games/snake.js"></script>
+    <script src="games/target.js"></script>
+    <script src="games/balloons.js"></script>
+    <script src="games/squares.js"></script>
+    <script src="games/clicker.js"></script>
+    <script src="games/slot.js"></script>
+</body>
+</html>

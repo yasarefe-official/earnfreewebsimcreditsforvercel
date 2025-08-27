@@ -1,0 +1,64 @@
+{
+  "database": {
+    "schema": {
+      "users_v2_1": {
+        "id": { "type": "uuid" },
+        "username": { "type": "text" },
+        "userId": { "type": "uuid" },
+        "coins": { "type": "numeric" },
+        "totalCoinsEarned": { "type": "numeric" },
+        "gamesPlayed": { "type": "integer" },
+        "hasProjects": { "type": "boolean" },
+        "projectsCheckedAt": { "type": "timestamptz" },
+        "createdAt": { "type": "timestamptz" },
+        "lastActiveAt": { "type": "timestamptz" },
+        "lastPlayedClicker": { "type": "timestamptz", "description": "Timestamp of the last time the user played the Clicker game." },
+        "banned_until": { "type": "timestamptz", "description": "Timestamp until which the user is banned from playing." },
+        "vip_until": { "type": "timestamptz", "description": "Timestamp until which the user's VIP membership is active." }
+      },
+      "coin_transactions_v2_1": {
+        "id": { "type": "uuid" },
+        "username": { "type": "text" },
+        "userId": { "type": "uuid" },
+        "amount": { "type": "numeric" },
+        "source": { "type": "text" },
+        "type": { "type": "text" },
+        "timestamp": { "type": "timestamptz" },
+        "sessionId": { "type": "text" }
+      },
+      "credit_requests_v2_1": {
+        "id": { "type": "uuid" },
+        "username": { "type": "text" },
+        "userId": { "type": "uuid" },
+        "coinsAmount": { "type": "numeric" },
+        "creditsAmount": { "type": "numeric" },
+        "status": { "type": "text" },
+        "requestedAt": { "type": "timestamptz" },
+        "approvedAt": { "type": "timestamptz" },
+        "approvedBy": { "type": "text" },
+        "rejectedAt": { "type": "timestamptz" },
+        "rejectedBy": { "type": "text" }
+      },
+      "used_credit_tips_v2_1": {
+        "id": { "type": "text", "description": "The comment ID of the tip." },
+        "user_id": { "type": "uuid" },
+        "credits_spent": { "type": "numeric" },
+        "coins_gained": { "type": "numeric" },
+        "processed_at": { "type": "timestamptz" }
+      },
+      "admin_vault_v2_1": {
+        "id": { "type": "text", "description": "Primary key for the single vault record, e.g., 'main'." },
+        "coins": { "type": "numeric", "description": "Total coins held in the admin vault." }
+      },
+      "admin_vault_transactions_v2_1": {
+        "id": { "type": "uuid" },
+        "admin_user_id": { "type": "uuid" },
+        "recipient_user_id": { "type": "uuid" },
+        "amount": { "type": "numeric" },
+        "reason": { "type": "text" },
+        "timestamp": { "type": "timestamptz" }
+      }
+    },
+    "instructions": "This database stores user progress, transactions, and credit conversion requests for the Coin Games app."
+  }
+}

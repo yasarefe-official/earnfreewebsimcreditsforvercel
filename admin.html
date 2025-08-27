@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - Coin Games</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --admin-primary: #6366f1;
+            --admin-secondary: #8b5cf6;
+            --admin-success: #10b981;
+            --admin-warning: #f59e0b;
+            --admin-danger: #ef4444;
+            --admin-bg: #0f172a;
+            --admin-surface: #1e293b;
+            --admin-border: #334155;
+            --admin-text: #f1f5f9;
+            --admin-text-muted: #94a3b8;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: var(--admin-bg);
+            color: var(--admin-text);
+            line-height: 1.6;
+        }
+
+        #admin-app {
+             min-height: 100vh;
+        }
+
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: var(--admin-bg);
+            color: var(--admin-text);
+        }
+
+        .loading-content {
+            text-align: center;
+        }
+
+        .spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid var(--admin-border);
+            border-top: 4px solid var(--admin-primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .admin-dashboard {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .admin-header {
+            background: var(--admin-surface);
+            border-bottom: 2px solid var(--admin-border);
+            padding: 1rem 2rem;
+        }
+
+        .admin-header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .admin-logo {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .admin-icon {
+            font-size: 2rem;
+        }
+
+        .admin-logo h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--admin-primary), var(--admin-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .admin-user {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .admin-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 2px solid var(--admin-primary);
+        }
+
+        .admin-nav {
+            background: var(--admin-surface);
+            border-bottom: 2px solid var(--admin-border);
+            padding: 0 2rem;
+            display: flex;
+            gap: 1rem;
+            overflow-x: auto;
+        }
+
+        .admin-nav-btn {
+            background: none;
+            border: none;
+            color: var(--admin-text-muted);
+            padding: 1rem 1.5rem;
+            cursor: pointer;
+            font-weight: 500;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .admin-nav-btn:hover {
+            color: var(--admin-text);
+            background: rgba(99, 102, 241, 0.1);
+        }
+
+        .admin-nav-btn.active {
+            color: var(--admin-primary);
+            border-bottom-color: var(--admin-primary);
+        }
+
+        .admin-main {
+            flex: 1;
+            padding: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .admin-section {
+            display: none;
+        }
+
+        .admin-section.active {
+            display: block;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .refresh-btn {
+            background: var(--admin-primary);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.875rem;
+            transition: all 0.2s ease;
+        }
+
+        .refresh-btn:hover {
+            background: var(--admin-secondary);
+            transform: scale(1.05);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: var(--admin-surface);
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 2px solid var(--admin-border);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            transition: transform 0.2s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+        }
+
+        .stat-icon {
+            font-size: 2.5rem;
+            width: 60px;
+            height: 60px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, var(--admin-primary), var(--admin-secondary));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .stat-info h3 {
+            font-size: 0.875rem;
+            color: var(--admin-text-muted);
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--admin-text);
+        }
+
+        .admin-cards {
+            display: grid;
+            gap: 1.5rem;
+        }
+
+        .card {
+            background: var(--admin-surface);
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 2px solid var(--admin-border);
+        }
+
+        .card h3 {
+            margin-bottom: 1rem;
+            color: var(--admin-text);
+        }
+
+        .requests-list, .users-list, .transactions-list {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .request-card, .user-card, .transaction-card {
+            background: var(--admin-bg);
+            border-radius: 8px;
+            padding: 1rem;
+            border: 1px solid var(--admin-border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-info {
+            flex: 1;
+        }
+
+        .card-info h4 {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .card-info p {
+            color: var(--admin-text-muted);
+            font-size: 0.875rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .card-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-approve {
+            background: var(--admin-success);
+            color: white;
+        }
+
+        .btn-reject {
+            background: var(--admin-danger);
+            color: white;
+        }
+
+        .btn:hover {
+            transform: scale(1.05);
+        }
+
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            text-transform: uppercase;
+        }
+
+        .status-pending {
+            background: rgba(245, 158, 11, 0.2);
+            color: var(--admin-warning);
+        }
+
+        .status-approved {
+            background: rgba(16, 185, 129, 0.2);
+            color: var(--admin-success);
+        }
+
+        .status-rejected {
+            background: rgba(239, 68, 68, 0.2);
+            color: var(--admin-danger);
+        }
+
+        .activity-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .activity-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            background: var(--admin-bg);
+            border-radius: 8px;
+            border-left: 3px solid var(--admin-primary);
+        }
+
+        .empty-state {
+            text-align: center;
+            color: var(--admin-text-muted);
+            padding: 2rem;
+        }
+
+        @media (max-width: 768px) {
+            .admin-header {
+                padding: 1rem;
+            }
+
+            .admin-nav {
+                padding: 0 1rem;
+            }
+
+            .admin-main {
+                padding: 1rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .request-card, .user-card, .transaction-card {
+                flex-direction: column;
+                gap: 1rem;
+                align-items: stretch;
+            }
+
+            .card-actions {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="admin-app">
+        <div class="loading">
+            <div class="loading-content">
+                <div class="spinner"></div>
+                <p>Loading Admin Panel...</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/websim-socket@latest/dist/websim.js"></script>
+    <script src="admin.js"></script>
+</body>
+</html>
