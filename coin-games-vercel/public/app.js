@@ -462,6 +462,27 @@ function closeModal() {
     gameModal.classList.remove('active');
 }
 
+/**
+ * Silently refreshes the user's coin balance and other dynamic data.
+ */
+async function refreshUserData() {
+    if (!currentUser || !currentUser.name) return;
+
+    try {
+        const userRecord = await getUserRecord(currentUser.name);
+        // Only update if the value has actually changed to prevent flicker
+        if (userRecord && gameData.coins !== userRecord.coins) {
+            console.log(`Polling update: Coins changed from ${gameData.coins} to ${userRecord.coins}`);
+            gameData.coins = userRecord.coins;
+            updateCoinBalance();
+        }
+        // Future: could also refresh VIP status here
+    } catch (error) {
+        // Fail silently as this is a background task
+        console.warn("Polling failed to refresh user data:", error.message);
+    }
+}
+
 async function initApp(sessionUser) {
     console.log("initApp started...");
     getDomElements(); // Get elements early to manipulate loading screen
@@ -501,6 +522,10 @@ async function initApp(sessionUser) {
         console.log("Initialization complete. Showing app.");
         loadingScreen.style.display = 'none';
         app.style.display = 'block';
+
+        // Start polling for real-time updates
+        setInterval(refreshUserData, 5000); // Refresh every 5 seconds
+        console.log("User data polling started.");
 
     } catch (error) {
         console.error('Failed to initialize app:', error);
