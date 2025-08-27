@@ -117,7 +117,7 @@ async function loadLeaderboard() {
     if (!leaderboardList) return;
     leaderboardList.innerHTML = '<div class="loading-state">Loading leaderboard...</div>';
     try {
-        const response = await fetch('/api/leaderboard');
+        const response = await fetch('/api/leaderboard', { cache: 'no-store' });
         if (!response.ok) throw new Error('Failed to fetch leaderboard');
         const users = await response.json();
 
@@ -463,20 +463,28 @@ function closeModal() {
 }
 
 async function initApp(sessionUser) {
+    console.log("initApp started...");
+    getDomElements(); // Get elements early to manipulate loading screen
+
     if (!sessionUser || !sessionUser.name) {
         console.error("initApp called without a valid user.");
+        if(loadingScreen) loadingScreen.innerHTML = `<div class="loader"><p style="color: red;">Authentication error. Please try again.</p></div>`;
         return;
     }
 
     currentUser = sessionUser;
-    getDomElements();
+    console.log(`Current user set: ${currentUser.name}`);
 
     try {
+        console.log("Fetching user record...");
         const userRecord = await getUserRecord(currentUser.name);
+        console.log("User record fetched:", userRecord);
+
         if (!userRecord) {
-            throw new Error(`Could not load user data for ${currentUser.name}`);
+            throw new Error(`Could not load user data for ${currentUser.name}. The user may not exist in the database.`);
         }
 
+        console.log("Populating game data...");
         gameData.coins = userRecord.coins || 0;
         gameData.vipUntil = userRecord.vip_until ? new Date(userRecord.vip_until) : null;
 
@@ -487,15 +495,19 @@ async function initApp(sessionUser) {
             if(adminTabButton) adminTabButton.style.display = 'block';
         }
 
+        console.log("Initializing event listeners...");
         initEventListeners();
 
+        console.log("Initialization complete. Showing app.");
         loadingScreen.style.display = 'none';
         app.style.display = 'block';
 
     } catch (error) {
         console.error('Failed to initialize app:', error);
-        loadingScreen.style.display = 'none';
-        document.body.innerHTML = `<div style="text-align: center; padding: 2rem; color: red;"><h1>Failed to load app</h1><p>${error.message}</p></div>`;
+        if (loadingScreen) {
+            const loader = loadingScreen.querySelector('.loader');
+            if(loader) loader.innerHTML = `<p style="color: red; max-width: 400px; margin: auto;"><b>Error:</b> Failed to load app data. Please check the console and ensure the database is set up correctly.<br/><br/>${error.message}</p>`;
+        }
     }
 }
 
