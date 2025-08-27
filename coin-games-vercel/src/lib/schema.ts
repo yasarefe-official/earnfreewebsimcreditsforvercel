@@ -5,7 +5,7 @@ export async function createTables() {
 
   await sql`
     CREATE TABLE IF NOT EXISTS users_v2_1 (
-      id UUID PRIMARY KEY,
+      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
       username TEXT UNIQUE NOT NULL,
       userId UUID UNIQUE,
       coins NUMERIC(15, 2) DEFAULT 0,
