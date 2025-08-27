@@ -49,7 +49,7 @@ async function seedUsers() {
       ];
 
       const result = await client.query(query, values);
-      if (result?.rowCount > 0) {
+      if (result && result.rowCount && result.rowCount > 0) {
         seededCount++;
         console.log(`Seeded user: ${user.username}`);
       }
