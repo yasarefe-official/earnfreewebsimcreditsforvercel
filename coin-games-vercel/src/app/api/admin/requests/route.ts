@@ -1,9 +1,10 @@
 import { sql } from '@vercel/postgres';
 import { NextResponse } from 'next/server';
 
-// In a real app, you'd protect this route to ensure only admins can access it.
-// For example, using middleware and checking user roles from a session.
+// This forces the route to be rendered dynamically, preventing caching.
+export const dynamic = 'force-dynamic';
 
+// In a real app, you'd protect this route to ensure only admins can access it.
 export async function GET() {
   try {
     const { rows: requests } = await sql`

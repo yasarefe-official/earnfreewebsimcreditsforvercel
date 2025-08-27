@@ -1,6 +1,9 @@
 import { sql } from '@vercel/postgres';
 import { NextResponse } from 'next/server';
 
+// This forces the route to be rendered dynamically, preventing caching.
+export const dynamic = 'force-dynamic';
+
 export async function GET(
   request: Request,
   { params }: { params: { username: string } }
