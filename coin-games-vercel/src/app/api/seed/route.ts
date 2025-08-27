@@ -20,6 +20,8 @@ async function seedUsers() {
 
     let seededCount = 0;
     for (const user of users) {
+      // The schema now has `DEFAULT gen_random_uuid()` for the id,
+      // so we can pass null if the user.id is missing.
       const query = `
         INSERT INTO users_v2_1 (
           id, username, userId, coins, totalCoinsEarned, gamesPlayed,
@@ -27,15 +29,15 @@ async function seedUsers() {
           lastPlayedClicker, banned_until, vip_until
         )
         VALUES (
-          $1, $2, COALESCE($3, $1), $4, $5, $6, $7, $8, $9, $10, $11, $12, $13
+          $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13
         )
         ON CONFLICT (username) DO NOTHING;
       `;
 
       const values = [
-        user.id,
+        user.id || null, // Pass null if id is missing, DB will use DEFAULT
         user.username,
-        user.userId || user.user_id,
+        user.userId || user.user_id || null,
         user.coins || 0,
         user.totalCoinsEarned || 0,
         user.gamesPlayed || 0,
@@ -49,7 +51,7 @@ async function seedUsers() {
       ];
 
       const result = await client.query(query, values);
-      if (result && result.rowCount && result.rowCount > 0) {
+      if (result?.rowCount > 0) {
         seededCount++;
         console.log(`Seeded user: ${user.username}`);
       }
