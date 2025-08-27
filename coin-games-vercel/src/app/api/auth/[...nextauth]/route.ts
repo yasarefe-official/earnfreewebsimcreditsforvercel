@@ -1,8 +1,8 @@
-import NextAuth from "next-auth"
+import NextAuth, { AuthOptions } from "next-auth"
 import CredentialsProvider from "next-auth/providers/credentials"
 import { sql } from '@vercel/postgres';
 
-export const authOptions = {
+const authOptions: AuthOptions = {
   providers: [
     CredentialsProvider({
       name: 'Credentials',
@@ -43,16 +43,18 @@ export const authOptions = {
     strategy: "jwt",
   },
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user }: { token: any, user: any }) {
       if (user) {
         token.id = user.id;
         token.name = user.name;
       }
       return token;
     },
-    async session({ session, token }) {
-      session.user.id = token.id as string;
-      session.user.name = token.name;
+    async session({ session, token }: { session: any, token: any }) {
+      if (session.user) {
+        session.user.id = token.id;
+        session.user.name = token.name;
+      }
       return session;
     },
   },
