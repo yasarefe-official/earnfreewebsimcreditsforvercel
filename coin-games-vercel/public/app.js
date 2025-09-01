@@ -59,20 +59,7 @@ function getDomElements() {
     userAvatar = document.getElementById('userAvatar');
 }
 
-// --- NEW API-DRIVEN FUNCTIONS ---
-
-async function getUserRecord(username) {
-    try {
-        const response = await fetch(`/api/users/${username}`);
-        if (!response.ok) {
-            throw new Error(`Failed to fetch user data: ${response.statusText}`);
-        }
-        return await response.json();
-    } catch (error) {
-        console.error('Error getting user record:', error);
-        return null;
-    }
-}
+// --- NEW SERVER-ACTION-BASED FUNCTIONS ---
 
 async function awardCoins(amount, source = 'game') {
     if (!currentUser) return false;
@@ -84,22 +71,10 @@ async function awardCoins(amount, source = 'game') {
     }
 
     try {
-        const response = await fetch('/api/coins/award', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                username: currentUser.name,
-                amount: roundedAmount,
-                source: source,
-            }),
-        });
-
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.error || 'Failed to award coins');
+        const result = await window.appBridge.awardCoins(roundedAmount, source);
+        if (result.error) {
+            throw new Error(result.error);
         }
-
-        const result = await response.json();
         gameData.coins = result.newBalance;
         updateCoinBalance();
         showCoinEarned(roundedAmount, "");
@@ -117,9 +92,9 @@ async function loadLeaderboard() {
     if (!leaderboardList) return;
     leaderboardList.innerHTML = '<div class="loading-state">Loading leaderboard...</div>';
     try {
-        const response = await fetch('/api/leaderboard');
-        if (!response.ok) throw new Error('Failed to fetch leaderboard');
-        const users = await response.json();
+        const result = await window.appBridge.getLeaderboard();
+        if (result.error) throw new Error(result.error);
+        const users = result.users;
 
         leaderboardList.innerHTML = '';
         if (users.length === 0) {
@@ -158,7 +133,9 @@ async function loadLeaderboard() {
 
 function updateCoinBalance() {
     if (coinBalance) {
-        coinBalance.textContent = Math.floor(gameData.coins).toLocaleString();
+        // This will be updated by React, but we can also update it here for responsiveness
+        const reactCoinBalance = document.getElementById('coinBalance');
+        if(reactCoinBalance) reactCoinBalance.textContent = Math.floor(gameData.coins).toLocaleString();
     }
 }
 
@@ -186,22 +163,14 @@ function switchTab(tabName) {
     } else if (tabName === 'credits') {
         loadConversionHistory();
     } else if (tabName === 'admin' && currentUser?.name === 'ysr') {
-        // For now, load only credit requests in admin panel
         loadAdminCreditRequests();
     }
 }
 
 async function approveRequest(requestId) {
     try {
-        const response = await fetch('/api/admin/requests/approve', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ requestId }),
-        });
-        if (!response.ok) {
-            const err = await response.json();
-            throw new Error(err.error);
-        }
+        const result = await window.appBridge.approveRequest(requestId);
+        if (result.error) throw new Error(result.error);
         alert('Request approved!');
         loadAdminCreditRequests(); // Refresh list
     } catch (error) {
@@ -213,15 +182,8 @@ async function approveRequest(requestId) {
 async function rejectRequest(requestId) {
     if (!confirm('Are you sure you want to reject this request? The user\'s coins will be refunded.')) return;
     try {
-        const response = await fetch('/api/admin/requests/reject', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ requestId }),
-        });
-        if (!response.ok) {
-            const err = await response.json();
-            throw new Error(err.error);
-        }
+        const result = await window.appBridge.rejectRequest(requestId);
+        if (result.error) throw new Error(result.error);
         alert('Request rejected and coins refunded.');
         loadAdminCreditRequests(); // Refresh list
     } catch (error) {
@@ -233,16 +195,13 @@ async function rejectRequest(requestId) {
 
 async function loadAdminCreditRequests() {
     const requestsList = document.getElementById('adminCreditRequestsList');
-    if (!requestsList) {
-        // This is okay if the user is not an admin and the panel doesn't exist.
-        return;
-    }
+    if (!requestsList) return;
     requestsList.innerHTML = '<div class="loading-state">Loading requests...</div>';
 
     try {
-        const response = await fetch('/api/admin/requests');
-        if (!response.ok) throw new Error('Failed to fetch requests');
-        const requests = await response.json();
+        const result = await window.appBridge.getAdminRequests();
+        if (result.error) throw new Error(result.error);
+        const requests = result.requests;
 
         requestsList.innerHTML = '';
         if (requests.length === 0) {
@@ -282,9 +241,9 @@ async function loadConversionHistory() {
 
     historyList.innerHTML = '<div class="loading-state">Loading history...</div>';
     try {
-        const response = await fetch(`/api/credits/history/${currentUser.name}`);
-        if (!response.ok) throw new Error('Failed to fetch conversion history');
-        const requests = await response.json();
+        const result = await window.appBridge.getConversionHistory();
+        if (result.error) throw new Error(result.error);
+        const requests = result.history;
 
         historyList.innerHTML = '';
         if (requests.length === 0) {
@@ -328,24 +287,8 @@ async function initiateCreditConversion(e) {
     convertBtn.textContent = 'Processing...';
 
     try {
-        const credits = Math.floor(coins / 4); // Basic conversion rule
-
-        const response = await fetch('/api/credits/request', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                username: currentUser.name,
-                coinsAmount: coins,
-                creditsAmount: credits,
-            }),
-        });
-
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.error || 'Failed to submit request');
-        }
-
-        const result = await response.json();
+        const result = await window.appBridge.requestConversion(coins);
+        if (result.error) throw new Error(result.error);
 
         // Update local state and UI
         gameData.coins = result.newBalance;
@@ -462,29 +405,36 @@ function closeModal() {
     gameModal.classList.remove('active');
 }
 
-async function initApp(sessionUser) {
-    if (!sessionUser || !sessionUser.name) {
+async function initApp(user) {
+    if (!user || !user.name) {
         console.error("initApp called without a valid user.");
         return;
     }
 
-    currentUser = sessionUser;
+    currentUser = user;
     getDomElements();
 
     try {
-        const userRecord = await getUserRecord(currentUser.name);
-        if (!userRecord) {
-            throw new Error(`Could not load user data for ${currentUser.name}`);
-        }
-
-        gameData.coins = userRecord.coins || 0;
-        gameData.vipUntil = userRecord.vip_until ? new Date(userRecord.vip_until) : null;
+        gameData.coins = user.coins || 0;
+        // The user object from the initial login doesn't have vip_until, so we can't set it here.
+        // This might need to be fetched if VIP status is important. For now, we'll ignore it.
+        // gameData.vipUntil = user.vip_until ? new Date(user.vip_until) : null;
 
         updateCoinBalance();
 
         if (currentUser.name === 'ysr') {
             const adminTabButton = document.querySelector('[data-tab="admin"]');
             if(adminTabButton) adminTabButton.style.display = 'block';
+
+            const adminPanel = document.getElementById('adminTab');
+            if (adminPanel) {
+                adminPanel.innerHTML = `
+                    <div class="admin-container">
+                        <h2>Admin Panel - Credit Requests</h2>
+                        <div id="adminCreditRequestsList"></div>
+                    </div>
+                `;
+            }
         }
 
         initEventListeners();
