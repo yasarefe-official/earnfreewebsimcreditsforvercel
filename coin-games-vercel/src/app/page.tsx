@@ -2,13 +2,41 @@
 
 import Script from 'next/script';
 import Head from 'next/head';
-import { useSession, signIn, signOut } from 'next-auth/react';
 import { useState, useEffect } from 'react';
+import {
+  getOrCreateUser,
+  awardCoins,
+  getLeaderboard,
+  getConversionHistory,
+  requestConversion,
+  getAdminRequests,
+  approveRequest,
+  rejectRequest
+} from './actions';
+
+// Define a type for the user object
+type User = {
+  id: string;
+  username: string;
+  coins: number;
+};
+
+// Define a type for our App Bridge
+interface AppBridge {
+  awardCoins: (amount: number, source: string) => Promise<any>;
+  getLeaderboard: () => Promise<any>;
+  getConversionHistory: () => Promise<any>;
+  requestConversion: (coins: number) => Promise<any>;
+  getAdminRequests: () => Promise<any>;
+  approveRequest: (id: string) => Promise<any>;
+  rejectRequest: (id: string) => Promise<any>;
+}
 
 // Define a type for the global window object
 declare global {
   interface Window {
-    initApp: (user: any) => void;
+    initApp: (user: { name: string; coins: number }) => void;
+    appBridge: AppBridge;
     initCatchGame: () => void;
     initSnakeGame: () => void;
     initTargetGame: () => void;
@@ -20,75 +48,95 @@ declare global {
   }
 }
 
-
-function LoginPage() {
+function UsernamePage({ onLoginSuccess }: { onLoginSuccess: (user: User) => void }) {
   const [username, setUsername] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    if (!username) {
-      setError('Please enter your username.');
-      return;
-    }
-    const result = await signIn('credentials', {
-      redirect: false,
-      username: username,
-    });
+    setLoading(true);
 
-    if (result?.error) {
-      setError('Login failed. Please check your username or register if you are a new user.');
+    let usernameToSubmit = username.trim();
+    if (!usernameToSubmit) {
+      usernameToSubmit = `User${Math.floor(Math.random() * 10000)}`;
+    }
+
+    const result = await getOrCreateUser(usernameToSubmit);
+
+    setLoading(false);
+
+    if (result.error) {
+      setError(result.error);
+    } else if (result.user) {
+      onLoginSuccess(result.user as User);
     }
   };
 
   return (
     <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', flexDirection: 'column' }}>
       <h1>Welcome to Coin Games</h1>
-      <p style={{ marginBottom: '2rem' }}>Please sign in to continue</p>
+      <p style={{ marginBottom: '2rem' }}>Please enter a username to play</p>
       <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem', minWidth: '300px' }}>
         <input
           type="text"
           value={username}
           onChange={(e) => setUsername(e.target.value)}
-          placeholder="Enter your WebSim username"
+          placeholder="Enter your username (optional)"
           style={{ padding: '0.5rem', color: '#333' }}
+          disabled={loading}
         />
-        <button type="submit" style={{ padding: '0.5rem', cursor: 'pointer' }}>
-          Sign In
+        <button type="submit" style={{ padding: '0.5rem', cursor: 'pointer' }} disabled={loading}>
+          {loading ? 'Loading...' : 'Play'}
         </button>
         {error && <p style={{ color: 'red' }}>{error}</p>}
       </form>
-      <p style={{marginTop: '1rem', color: '#aaa', fontSize: '0.8rem'}}>New user? Registration will be available soon.</p>
     </div>
   );
 }
 
 
 export default function Home() {
-  const { data: session, status } = useSession();
+  const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
-    if (status === 'authenticated' && typeof window.initApp === 'function') {
-      // Pass the user object from the session to our vanilla JS app
-      window.initApp(session.user);
+    if (user) {
+      // Setup the bridge for vanilla JS to talk to server actions
+      window.appBridge = {
+        awardCoins: async (amount, source) => {
+          const result = await awardCoins(user.username, amount, source);
+          if (result.newBalance) {
+            setUser(prevUser => ({ ...prevUser!, coins: result.newBalance }));
+          }
+          return result;
+        },
+        getLeaderboard: getLeaderboard,
+        getConversionHistory: () => getConversionHistory(user.username),
+        requestConversion: async (coins) => {
+          const result = await requestConversion(user.username, coins);
+           if (result.newBalance) {
+            setUser(prevUser => ({ ...prevUser!, coins: result.newBalance }));
+          }
+          return result;
+        },
+        getAdminRequests: getAdminRequests,
+        approveRequest: approveRequest,
+        rejectRequest: rejectRequest
+      };
+
+      if (typeof window.initApp === 'function') {
+         window.initApp({ name: user.username, coins: user.coins });
+      }
     }
-  }, [status, session]);
+  }, [user]);
 
+  const handleLogout = () => {
+    setUser(null);
+  };
 
-  if (status === 'loading') {
-    return (
-      <div id="loadingScreen" className="loading-screen">
-        <div className="loader">
-          <div className="coin-spinner"></div>
-          <p>Loading session...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (status === 'unauthenticated') {
-    return <LoginPage />;
+  if (!user) {
+    return <UsernamePage onLoginSuccess={setUser} />;
   }
 
   return (
@@ -117,16 +165,16 @@ export default function Home() {
               <h1>Coin Games</h1>
             </div>
             <div className="user-info" id="userInfo">
-               <button onClick={() => signOut()} style={{ padding: '0.5rem', cursor: 'pointer', background: 'var(--danger-color)', border: 'none', color: 'white', borderRadius: '8px' }}>
-                Sign Out
+               <button onClick={handleLogout} style={{ padding: '0.5rem', cursor: 'pointer', background: 'var(--danger-color)', border: 'none', color: 'white', borderRadius: '8px' }}>
+                Change Username
               </button>
               <div className="coin-balance">
                 <span className="coin-icon">🪙</span>
-                <span id="coinBalance">0</span>
+                <span id="coinBalance">{user.coins}</span>
               </div>
               <div className="user-profile" id="userProfile">
-                <img id="userAvatar" src={`https://images.websim.com/avatar/${session?.user?.name}`} alt="User Avatar" className="user-avatar" />
-                <span id="username">{session?.user?.name}</span>
+                <img id="userAvatar" src={`https://images.websim.com/avatar/${user.username}`} alt="User Avatar" className="user-avatar" />
+                <span id="username">{user.username}</span>
               </div>
             </div>
           </div>
