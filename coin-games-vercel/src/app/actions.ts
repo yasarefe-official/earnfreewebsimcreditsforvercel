@@ -15,8 +15,8 @@ export async function getOrCreateUser(username: string) {
     } else {
       // User does not exist, create a new user
       const newUserResult = await sql`
-        INSERT INTO users_v2_1 (id, username, coins, totalCoinsEarned, gamesPlayed, createdAt, lastActiveAt)
-        VALUES (DEFAULT, ${username}, 0, 0, 0, NOW(), NOW())
+        INSERT INTO users_v2_1 (username, coins, totalCoinsEarned, gamesPlayed, createdAt, lastActiveAt)
+        VALUES (${username}, 0, 0, 0, NOW(), NOW())
         RETURNING id, username, coins;
       `;
       return { user: newUserResult.rows[0] };

@@ -1,6 +1,15 @@
 import { sql } from '@vercel/postgres';
 
 export async function createTables() {
+  console.log("Dropping existing tables...");
+  await sql`DROP TABLE IF EXISTS users_v2_1 CASCADE;`;
+  await sql`DROP TABLE IF EXISTS coin_transactions_v2_1 CASCADE;`;
+  await sql`DROP TABLE IF EXISTS credit_requests_v2_1 CASCADE;`;
+  await sql`DROP TABLE IF EXISTS used_credit_tips_v2_1 CASCADE;`;
+  await sql`DROP TABLE IF EXISTS admin_vault_v2_1 CASCADE;`;
+  await sql`DROP TABLE IF EXISTS admin_vault_transactions_v2_1 CASCADE;`;
+  console.log("Existing tables dropped.");
+
   console.log("Creating tables...");
 
   await sql`
